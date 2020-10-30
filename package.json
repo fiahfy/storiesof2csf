@@ -39,7 +39,7 @@
   "keywords": [
     "converter",
     "flow",
-    "typescript"
+    "storybook"
   ],
   "license": "MIT",
   "main": "dist/index.js",
