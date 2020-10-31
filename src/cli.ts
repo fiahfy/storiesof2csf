@@ -14,7 +14,7 @@ const main = async (): Promise<void> => {
 
 	Examples:
     $ storiesof2csf index.js
-    $ storiesof2csf src/**/.js
+    $ storiesof2csf src/**/*.js
 `,
     {
       flags: {

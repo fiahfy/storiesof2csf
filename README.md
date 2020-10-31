@@ -16,18 +16,18 @@ npm install @fiahfy/storiesof2csf
 ```js
 import { convert } from '@fiahfy/storiesof2csf'
 
-convert(['index.js'])
+convert(['Button.stories.js'])
 ```
 
 ## CLI
 
 ```bash
 npm install -g @fiahfy/storiesof2csf
-storiesof2csf index.js
+storiesof2csf Button.stories.js
 ```
 
 or use via npx
 
 ```bash
-npx @fiahfy/storiesof2csf index.js
+npx @fiahfy/storiesof2csf Button.stories.js
 ```
