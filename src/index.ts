@@ -18,26 +18,29 @@ const prependFlowAnnotation = (code: string, annotation: string): string => {
 }
 
 const convertFile = (src: string): void => {
-  let storyTitle
+  const titles: string[] = []
   const code = fs
     .readFileSync(src, 'utf8')
     .replace(
-      /(storiesOf\()([\s\S]*)(,[\s\n\t]*module[\s\n\t]*\))/,
+      /(storiesOf\()([\s\S]*?)(,[\s\n\t]*module[\s\n\t]*\))/g,
       (_, p1, p2, p3) => {
-        storyTitle = p2.trim()
-        return `${p1}'$$DUMMY_TITLE$$'${p3}`
+        titles.push(p2.trim())
+        return `${p1}'__DUMMY_TITLE_${titles.length - 1}__'${p3}`
       }
     )
+
   const atFlow = getFlowAnnotation(code)
 
-  let output = applyTransform(
+  let output = (applyTransform(
     transform,
     {},
     {
       path: src,
       source: code,
     }
-  ).replace("'$$DUMMY_TITLE$$'", storyTitle)
+  ) as string).replace(/'__DUMMY_TITLE_(\d+)__'/g, (_, p1) => {
+    return titles[p1]
+  })
 
   if (atFlow) {
     output = prependFlowAnnotation(output, atFlow)
