@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import meow from 'meow'
-import { convert } from '.'
+import { convert, parsers, Options } from '.'
 
 const main = async (): Promise<void> => {
   const cli = meow(
@@ -11,6 +11,8 @@ const main = async (): Promise<void> => {
 	Options:
     -v, --version  output the version number
     -h, --help     output usage information
+    --parser <babel|babylon|flow|ts|tsx|detect>
+                   the parser to use for parsing the source files (default: detect)
 
 	Examples:
     $ storiesof2csf index.js
@@ -25,6 +27,9 @@ const main = async (): Promise<void> => {
         version: {
           type: 'boolean',
           alias: 'v',
+        },
+        parser: {
+          type: 'string',
         },
       },
     }
@@ -43,7 +48,17 @@ const main = async (): Promise<void> => {
     return cli.showHelp()
   }
 
-  convert(inputs)
+  if (
+    cli.flags.parser &&
+    !parsers.includes(cli.flags.parser as NonNullable<Options['parser']>)
+  ) {
+    console.error('Invalid specified parser')
+    process.exitCode = 1
+    return
+  }
+  const parser = cli.flags.parser as Options['parser']
+
+  convert(inputs, { parser })
 }
 
 main().catch((e) => {
