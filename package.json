@@ -1,7 +1,7 @@
 {
   "name": "@fiahfy/storiesof2csf",
   "description": "CLI to convert old-style storiesOf stories into Component Story Format (CSF)",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": {
     "name": "fiahfy",
     "email": "d.fiahfy@gmail.com",
