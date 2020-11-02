@@ -3,7 +3,7 @@
 ![badge](https://github.com/fiahfy/storiesof2csf/workflows/Node.js%20Package/badge.svg)
 
 > CLI to convert old-style storiesOf stories into [Component Story Format (CSF)](https://storybook.js.org/docs/react/api/csf).  
-> Extends [`storiesof-to-csf` transform](https://www.npmjs.com/package/@storybook/codemod#storiesof-to-csf) to support dynamic title and flow annotation.
+> This package extends [`storiesof-to-csf` transform](https://www.npmjs.com/package/@storybook/codemod#storiesof-to-csf) to support dynamic story titles and story files written in TypeScript or Flow.
 
 ## Installation
 
