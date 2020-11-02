@@ -36,12 +36,22 @@ const getFlowAnnotation = (code: string): string | null => {
   return match ? match[0] : null
 }
 
-const prependFlowAnnotation = (code: string, annotation: string): string => {
+const prependFlowAnnotation = (code: string, annotation: string) => {
   return `${annotation}\n${code}`
+}
+
+const isOnlyAscii = (str: string) => {
+  // eslint-disable-next-line no-control-regex
+  return /^[\x00-\x7F]*$/.test(str)
+}
+
+const hasTemplateLiteral = (str: string) => {
+  return /\x60/.test(str)
 }
 
 const convertFile = (src: string, options: Options): void => {
   const titles: string[] = []
+  const names: string[] = []
   const code = fs
     .readFileSync(src, 'utf8')
     .replace(
@@ -51,13 +61,21 @@ const convertFile = (src: string, options: Options): void => {
         return `${p1}'__DUMMY_TITLE_${titles.length - 1}__'${p3}`
       }
     )
+    .replace(/(\.add\()([\s\S]*?)(,\s*\()/g, (match, p1, p2, p3) => {
+      // story is not converted if story names include template literals
+      if (isOnlyAscii(p2) && !hasTemplateLiteral(p2)) {
+        return match
+      }
+      names.push(p2.trim())
+      return `${p1}'__DUMMY_NAME_${names.length - 1}__'${p3}`
+    })
 
   const atFlow = getFlowAnnotation(code)
   const parser = atFlow ? 'flow' : getParser(src, options.parser)
 
   let output = ''
   try {
-    output = (applyTransform(
+    output = applyTransform(
       transform,
       {
         parser,
@@ -69,13 +87,19 @@ const convertFile = (src: string, options: Options): void => {
       {
         parser,
       }
-    ) as string).replace(/'__DUMMY_TITLE_(\d+)__'/g, (_, p1) => {
-      return titles[p1]
-    })
+    ) as string
   } catch (e) {
     console.log(`Tranform Failed ${path.resolve(src)}`)
     throw e
   }
+
+  output = output
+    .replace(/'__DUMMY_TITLE_(\d+)__'/g, (_, p1) => {
+      return titles[p1]
+    })
+    .replace(/'__DUMMY_NAME_(\d+)__'/g, (_, p1) => {
+      return names[p1]
+    })
 
   if (atFlow && !getFlowAnnotation(output)) {
     output = prependFlowAnnotation(output, atFlow)
