@@ -13,6 +13,7 @@ const main = async (): Promise<void> => {
     -h, --help     output usage information
     --parser <babel|babylon|flow|ts|tsx|detect>
                    the parser to use for parsing the source files (default: detect)
+    --no-error     do not throw error if the transform is failed
 
 	Examples:
     $ storiesof2csf index.js
@@ -22,14 +23,21 @@ const main = async (): Promise<void> => {
       flags: {
         help: {
           type: 'boolean',
+          default: false,
           alias: 'h',
         },
         version: {
           type: 'boolean',
+          default: false,
           alias: 'v',
         },
         parser: {
           type: 'string',
+          default: 'detect',
+        },
+        error: {
+          type: 'boolean',
+          default: true,
         },
       },
     }
@@ -48,17 +56,15 @@ const main = async (): Promise<void> => {
     return cli.showHelp()
   }
 
-  if (
-    cli.flags.parser &&
-    !parsers.includes(cli.flags.parser as NonNullable<Options['parser']>)
-  ) {
+  if (!parsers.includes(cli.flags.parser as NonNullable<Options['parser']>)) {
     console.error('Invalid specified parser')
     process.exitCode = 1
     return
   }
   const parser = cli.flags.parser as Options['parser']
+  const throwError = cli.flags.error
 
-  convert(inputs, { parser })
+  convert(inputs, { parser, throwError })
 }
 
 main().catch((e) => {

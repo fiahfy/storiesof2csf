@@ -18,6 +18,7 @@ type Parser = typeof parsers[number]
 
 export type Options = {
   parser?: Parser
+  throwError?: boolean
 }
 
 const getParser = (filepath: string, parser?: Parser): Parser => {
@@ -89,8 +90,12 @@ const convertFile = (src: string, options: Options): void => {
       }
     ) as string
   } catch (e) {
-    console.log(`Tranform Failed ${path.resolve(src)}`)
-    throw e
+    console.log(`Convert Failed ${path.resolve(src)}`)
+    if (options.throwError) {
+      throw e
+    } else {
+      return
+    }
   }
 
   output = output
