@@ -1,7 +1,18 @@
 #!/usr/bin/env node
 
+import fs from 'fs'
+import path from 'path'
 import meow from 'meow'
-import { convert, parsers, Options } from '.'
+import { convert } from '.'
+
+const parsers = ['babel', 'babylon', 'flow', 'ts', 'tsx', 'detect'] as const
+
+type Parser = typeof parsers[number]
+
+type Options = {
+  parser: Parser
+  throwError: boolean
+}
 
 const main = async (): Promise<void> => {
   const cli = meow(
@@ -43,28 +54,64 @@ const main = async (): Promise<void> => {
     }
   )
 
-  if (cli.flags.version) {
+  const inputs = cli.input
+  const { help, version, parser, error } = cli.flags
+
+  if (version) {
     return cli.showVersion()
   }
-  if (cli.flags.help) {
+  if (help) {
     return cli.showHelp()
   }
-
-  const inputs = cli.input
 
   if (!inputs.length) {
     return cli.showHelp()
   }
 
-  if (!parsers.includes(cli.flags.parser as NonNullable<Options['parser']>)) {
+  if (!isParser(parser)) {
     console.error('Invalid specified parser')
     process.exitCode = 1
     return
   }
-  const parser = cli.flags.parser as Options['parser']
-  const throwError = cli.flags.error
 
-  convert(inputs, { parser, throwError })
+  runFiles(inputs, { parser, throwError: error })
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isParser = (parser: any): parser is Parser => {
+  return parsers.includes(parser)
+}
+
+const runFiles = (inputs: string[], options: Options): void => {
+  for (const input of inputs) {
+    runFile(input, options)
+  }
+}
+const runFile = (input: string, options: Options): void => {
+  const code = fs.readFileSync(input, 'utf8')
+
+  const parser = getParser(input, options.parser)
+  try {
+    const converted = convert(code, { parser })
+    fs.writeFileSync(input, converted)
+    console.log(`Converted ${path.resolve(input)}`)
+  } catch (e) {
+    console.log(`Convert Failed ${path.resolve(input)}`)
+    if (options.throwError) {
+      throw e
+    }
+  }
+}
+
+const getParser = (filepath: string, parser: Parser): Parser => {
+  if (parser === 'detect') {
+    const ext = path.extname(filepath)
+    if (['.ts', '.tsx', '.flow'].includes(ext)) {
+      return ext.split('.')[1] as Parser
+    }
+    return 'babel'
+  }
+  return parser
 }
 
 main().catch((e) => {
