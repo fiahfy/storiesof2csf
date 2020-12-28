@@ -16,7 +16,7 @@ npm install @fiahfy/storiesof2csf
 ```js
 import { convert } from '@fiahfy/storiesof2csf'
 
-convert(['Button.stories.js'])
+convert(code, { parser: 'babel' })
 ```
 
 ## CLI
