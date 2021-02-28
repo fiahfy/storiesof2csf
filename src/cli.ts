@@ -70,8 +70,7 @@ const main = async (): Promise<void> => {
 
   if (!isParser(parser)) {
     console.error('Invalid specified parser')
-    process.exitCode = 1
-    return
+    return process.exit(1)
   }
 
   runFiles(inputs, { parser, throwError: error })
@@ -116,5 +115,5 @@ const getParser = (filepath: string, parser: Parser): Parser => {
 
 main().catch((e) => {
   console.error(e)
-  process.exitCode = 1
+  process.exit(1)
 })
